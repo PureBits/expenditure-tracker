@@ -22,17 +22,17 @@ try:
 	input_password = sys.argv[1]
 
 except:
-	input_password = input("비밀번호를 입력하셔야 합니다. : ")
+	input_password = raw_input("비밀번호를 입력하셔야 합니다. : ")
 	for i in range(2):
 		if input_password != "696238":
-			input_password = input("틀렸습니다. 다시 입력하세요 : ")
+			input_password = raw_input("틀렸습니다. 다시 입력하세요 : ")
 
 	if input_password != "696238":
 		sys.exit()
 else:
 	for i in range(2):
 		if input_password != "696238":
-			input_password = input("틀렸습니다. 다시 입력하세요 : ")
+			input_password = raw_input("틀렸습니다. 다시 입력하세요 : ")
 
 	if input_password != "696238":
 		sys.exit()
@@ -63,16 +63,16 @@ while True:
 월별 합계 및 일일 평균 기능은 3,
 종료는 9를 입력해주세요.""")
 	print('\n'+"↓" * 10+'\n')
-	menu_selected = input("원하시는 기능을 입력해주세요. : ")
+	menu_selected = raw_input("원하시는 기능을 입력해주세요. : ")
 
 	while menu_selected not in ["1","2","3","9"]:
-		menu_selected = input("4가지의 숫자 중 원하시는 것을 정확히 입력해주세요. : ")
+		menu_selected = raw_input("4가지의 숫자 중 원하시는 것을 정확히 입력해주세요. : ")
 
 #프로그램 종료 사인.
 	if menu_selected == "9":
 		print("감사합니다. 프로그램을 종료합니다.")
-		for i in range(3):
-			print("종료까지.. "+str(3-i))
+		for i in range(1,4)[::-1]:
+			print("종료까지.. "+str(i))
 			time.sleep(1)
 		sys.exit()
 
@@ -267,5 +267,4 @@ while True:
 #####################################
 ### menu 4. 관리자 기능. ###
 #####################################
-
 
