@@ -1,16 +1,19 @@
+# -*- coding: utf-8 -*-
+
 import datetime
 # import json
 import sys
 import time
 import pickle
-import Functions_for_tracker as ft # 내가 만든 함수 저장소 
+import hashlib
+import Functions_for_tracker as ft # 내가 만든 함수 저장소
 
 
 
 #expenditure_tracker.py
 #프로젝트 시작 날짜 : 2016-06-18
-""" 
-컴퓨터 시작 시 자동으로 시작되고, 
+"""
+컴퓨터 시작 시 자동으로 시작되고,
 그래서 매일의 돈 지출의 기록을 기록, 추적할 수 있도록 하는 것이 핵심이다.
 간단하게 매일 쓴 돈을 기록하고, 달별로 계산해주는 것을 목표로 한다.
 간단한 통계도 가능하게 한다.
@@ -18,25 +21,28 @@ import Functions_for_tracker as ft # 내가 만든 함수 저장소
 
 
 # 비밀번호 설정. 내가 아닌 다른 사람이 입력하는 것을 방지한다.
-try:
-	input_password = sys.argv[1]
 
-except:
-	input_password = raw_input("비밀번호를 입력하셔야 합니다. : ")
-	for i in range(2):
-		if input_password != "696238":
-			input_password = raw_input("틀렸습니다. 다시 입력하세요 : ")
+_pass = "696238" # 회사에서 파이썬코드를 쓸댄 이런짓은 하지 않기.
+_answer = hashlib.md5(_pass.encode('utf-8')).hexdigest()
+_to = 0x1
 
-	if input_password != "696238":
-		sys.exit()
+# backdoor
+if (len(sys.argv) >= 2):
+	attempt = hashlib.md5(str(sys.argv[1]).encode('utf-8')).hexdigest()
+	if cmp(_answer,attempt): sys.exit()
+
+# usual routine
 else:
-	for i in range(2):
-		if input_password != "696238":
-			input_password = raw_input("틀렸습니다. 다시 입력하세요 : ")
+	while True: # 부르트 포스의 가능성 ㅎㅎ
+		attempt = raw_input("비밀번호를 입력하셔야 합니다: ")
+		_hash = hashlib.md5(attempt.encode('utf-8')).hexdigest() # 타이밍의 가능성 ㅎㅎ
 
-	if input_password != "696238":
-		sys.exit()
-
+		if cmp(_answer,_hash) == 0: break
+		else:
+			print("[!] 비밀번호가 틀립니다.")
+			_to <<= 1
+			time.sleep(_to)
+	print("[*] 안녕하세요!")
 
 
 # 오늘에 대한 정보 입력. 이후 각각 파일에 저장될 것임.
@@ -77,13 +83,13 @@ while True:
 		sys.exit()
 
 # 파일 업로드 :
-	
+
 	with open('daily_expenditure.txt', 'rb') as money:
 		try:
 			total_record = pickle.load(money)
 		except:
 			total_record = []
-		
+
 	if total_record == []:
 		recent_record = [];
 	else:
@@ -96,11 +102,11 @@ while True:
 #####################################
 	# 기록되는 자료 형식은 다음과 같다. 기록되는 텍스트는 pickle package를 활용하도록 한다.
 	""" data_format =  {'today':str(today), 'weekday':ft.which_day(today), 'year':today.year, 'month':today.month, 'day':today.day, 'money_used':10000}"""
-	
+
 
 #### 1.1 - 만약 오늘 처음 금액 지출을 입력한다면 입력되고, 1.2 - 두 번째 이상일 경우 기존 입력된 금액에 추가한다.
 	if menu_selected == "1":
-		# 1.1 
+		# 1.1
 		if recent_record == [] or recent_record['today'] != str(today):
 			print()
 			print("\n오늘의 처음 입력이십니다.")
@@ -130,7 +136,7 @@ while True:
 			recent_record['money_used'] += money_spent
 			print("현재 시각",datetime.datetime.now()," 오늘 하루 사용하신 금액은 *{:,}*원 입력 받았습니다.".format(record['money_used']))
 			print("*" * 80,'\n')
-			
+
 			total_record[-1] = recent_record
 			with open('daily_expenditure.txt', 'wb') as money:
 				pickle.dump(total_record, money)
@@ -139,14 +145,14 @@ while True:
 #####################################
 #### menu 2. 특정 날짜 검색기능.  ########
 #####################################
-	# 연도, 월, 날짜를 기록하면 그 날에 사용한 금액을 반환한다. 만약 입력값이 없는 곳이라면 '없다'고 반환한다.(0원이 아니다.) 
+	# 연도, 월, 날짜를 기록하면 그 날에 사용한 금액을 반환한다. 만약 입력값이 없는 곳이라면 '없다'고 반환한다.(0원이 아니다.)
 
 	# 2.1 정확한 날짜 입력 받기.
 	if menu_selected == "2":
 		print()
 		print("특정 날짜 검색 기능입니다. 원하시는 날짜를 입력해주시면 그 날의 지출액을 알려드립니다.")
 		day_input = input("'2016-04-01'과 같은 형식으로 날짜를 입력해주세요 : ")
- 
+
 		while not ft.checkRightFormat(day_input):
 			# 형식이 맞는지 조사. 하나의 조건이라도 안 맞으면 no way..
 
@@ -163,7 +169,7 @@ while True:
 		input_month = int(day_input[5:7])
 		input_day = int(day_input[-2:]) # 이 값들은 입력받은 값으로 문자열이다. 반면 내가 갖고 있는 정보는 숫자. 통일이 필요.
 		asked_record = None
-	
+
 	# 맞는 값을 찾았음.
 		for record in total_record:
 			if record['year'] == input_year and record['month'] == input_month  \
@@ -184,16 +190,16 @@ while True:
 #####################################
 ### menu 3. 월별 합계 및 일일 평균 기능. ###
 #####################################
-	# 3.1 월별 합계 및 평균, 3.2 요일별 평균. 
+	# 3.1 월별 합계 및 평균, 3.2 요일별 평균.
 		"""
 		monthly_total = {
 							'2016' : {'1' : [0,0], '2': [0,0], '3': [0,0], '4': [0,0], '5':[0,0]\
 							'6':[0,0], '7':[0,0], '8':[0,0], '9':[0,0], '10':[0,0], '11':[0,0], '12':[0,0]},
-							
+
 						}
 		years = ['2016', '2017', '2018']
-		위와 같은 형식. 월의 첫번째 인자는 금액, 두 번째 인자는 입력된 날짜이다.				 
-		""" 
+		위와 같은 형식. 월의 첫번째 인자는 금액, 두 번째 인자는 입력된 날짜이다.
+		"""
 
 	# 만약 3번 기능을 요청 받았다면,
 	if menu_selected == "3":
@@ -239,9 +245,9 @@ while True:
 					print("  "+str(month) + "월별의 총 지출액은 *{:,}*원이고 입력해주신 날 수는 *".format(monthly_total[year][str(month)][0])  \
 									+ str(monthly_total[year][str(month)][1])+"*일입니다. 일일 평균 *{:,}\
 									*원 사용하셨습니다.".format(int(str(int(monthly_total[year][str(month)][0]) // int(monthly_total[year][str(month)][1])))))
-			print("\n")					
+			print("\n")
 
-		
+
 		# 3.2 요일 별 평균 내기.
 		weekday_total = {'월요일':[0,0], '화요일': [0,0], '수요일': [0,0], '목요일': [0,0],\
 		 '금요일': [0,0], '토요일': [0,0], '일요일': [0,0]}
@@ -267,4 +273,3 @@ while True:
 #####################################
 ### menu 4. 관리자 기능. ###
 #####################################
-
